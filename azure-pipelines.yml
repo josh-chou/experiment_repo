@@ -6,26 +6,38 @@
 trigger:
 - main
 
-pool:
-  vmImage: 'ubuntu-latest'
-strategy:
-  matrix:
-    Python37:
-      python.version: '3.7'
+variables:
+  environmentName: test
 
-steps:
-- task: UsePythonVersion@0
-  inputs:
-    versionSpec: '$(python.version)'
-  displayName: 'Use Python $(python.version)'
+  vmImageName: 'ubuntu-lates'
 
-- script: |
-    python -m pip install --upgrade pip
-    pip install pipenv
-    pipenv install
-  displayName: 'Install dependencies'
+stages:
+  - stage: build
+    displayName: Build stage
+    jobs:
+    - job: Build
+      displayName: Build
+      pool:
+        vmImage: $(vmImageName)
 
-- script: |
-    pipenv install pytest-azurepipelines
-    pipenv run python -m pytest
-  displayName: 'pytest'
+      strategy:
+        matrix:
+          Python37:
+            python.version: '3.7'
+
+      steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '$(python.version)'
+        displayName: 'Use Python $(python.version)'
+
+      - script: |
+          python -m pip install --upgrade pip
+          pip install pipenv
+          pipenv install
+        displayName: 'Install dependencies'
+
+      - script: |
+          pipenv install pytest-azurepipelines
+          pipenv run python -m pytest
+        displayName: 'pytest'
